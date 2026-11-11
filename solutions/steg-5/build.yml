@@ -1,0 +1,59 @@
+# Fasit for steg 5 — gjenbrukbar workflow
+#
+# Kopier denne til .github/workflows/build.yml i forken din.
+#
+# COMPOSITE ACTION ELLER GJENBRUKBAR WORKFLOW?
+# Dette er spørsmålet steg 5 egentlig handler om.
+#
+#   Composite action = STEG inni en jobb.
+#   Den arver jobbens runner, jobbens permissions og jobbens miljø.
+#   Bruk den når du gjentar de samme stegene.
+#
+#   Gjenbrukbar workflow = en eller flere HELE JOBBER.
+#   Den får sin egen runner, sine egne permissions og sine egne secrets.
+#   Bruk den når du gjentar et helt stykke pipeline på tvers av repoer.
+#
+# En gjenbrukbar workflow kjennetegnes av `on: workflow_call`. Den kan ikke
+# trigges direkte av en push — den må kalles av noen.
+
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: Hvilken Node-versjon som skal brukes
+        type: string
+        required: false
+        default: '24'
+    outputs:
+      test-count:
+        description: Antall tester som ble kjørt
+        # Outputs på workflow-nivå peker videre på et output fra en jobb.
+        value: ${{ jobs.build.outputs.test-count }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Jobb-outputs peker videre på et output fra et steg.
+    # Kjeden er altså: steg -> jobb -> workflow -> den som kalte.
+    outputs:
+      test-count: ${{ steps.test.outputs.count }}
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      - name: Sett opp appen
+        uses: ./.github/actions/setup-app
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      # `id:` er det som gjør at vi kan referere til stegets output senere.
+      - name: Kjør tester
+        id: test
+        run: |
+          npx vitest run --reporter=json --outputFile=vitest-results.json
+          echo "count=$(jq -r '.numTotalTests' vitest-results.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Bygg
+        run: npm run build

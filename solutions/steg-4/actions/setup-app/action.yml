@@ -1,0 +1,41 @@
+# Fasit for steg 4 — composite action
+#
+# Kopier denne til .github/actions/setup-app/action.yml i forken din.
+# Merk mappestrukturen: filen MÅ hete action.yml (eller action.yaml), og
+# mappenavnet er det du refererer til med `uses:`.
+#
+# TO FALLGRUVER SOM KOSTER TI MINUTTER HVER
+#
+#   1. `shell:` arves ikke.
+#      I en vanlig workflow kan du skrive `run:` uten `shell:`, fordi jobben
+#      har en default. I en composite action finnes ingen default — hvert
+#      eneste run-steg må ha `shell:` eksplisitt. Glemmer du det, feiler
+#      actionen med "Required property is missing: shell".
+#
+#   2. actions/checkout kan ikke ligge her.
+#      Denne actionen lastes fra repoet ditt, så repoet må allerede være
+#      sjekket ut før GitHub i det hele tatt finner filen du leser nå.
+#      Checkout må derfor bli værende som første steg i workflowen som
+#      bruker actionen.
+
+name: Setup app
+description: Setter opp Node og installerer avhengigheter fra lockfila
+
+inputs:
+  node-version:
+    description: Hvilken Node-versjon som skal brukes
+    required: false
+    default: '24'
+
+runs:
+  using: composite
+  steps:
+    - name: Sett opp Node
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: npm
+
+    - name: Installer avhengigheter
+      run: npm ci
+      shell: bash
