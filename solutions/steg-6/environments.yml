@@ -1,0 +1,59 @@
+# Fasit for steg 6 — environments, variabler og secrets
+#
+# Kopier denne til .github/workflows/environments.yml i forken din.
+#
+# FØR DEN VIRKER må du lage environmentene i GitHub:
+#   Settings -> Environments -> New environment -> "dev"
+#     Environment variables: APP_GREETING = "Hei fra dev"
+#     Environment secrets:   DEPLOY_TOKEN = "dev-hemmelighet-123"
+#   Gjenta for "prod" med andre verdier.
+#
+# POENGET MED STEGET
+# Legg merke til at YAML-en under ikke nevner "dev" eller "prod" med ett ord
+# i selve stegene. Den leser bare vars.APP_GREETING og secrets.DEPLOY_TOKEN.
+# Hvilket environment jobben kjører i, avgjør hvilke verdier den ser.
+# Samme kode, forskjellig konfigurasjon — det er hele idéen.
+#
+# TRE NIVÅER
+#   Repository variables/secrets  — gjelder alle jobber i repoet
+#   Environment variables/secrets — gjelder bare jobber med `environment:`
+#   Organization-nivå             — gjelder på tvers av repoer
+# Environment-nivå vinner over repository-nivå ved navnekollisjon.
+#
+# `vars` er synlige i loggen. `secrets` maskeres automatisk til ***,
+# også hvis du ved et uhell echoer dem. Ikke stol blindt på det:
+# maskeringen er en strengerstatning, og den klarer for eksempel ikke
+# å maskere en secret du har base64-kodet underveis.
+
+name: Environments
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Hvilket environment skal jobben kjøre mot?
+        type: choice
+        required: true
+        default: dev
+        options:
+          - dev
+          - prod
+
+jobs:
+  vis-konfigurasjon:
+    runs-on: ubuntu-latest
+    # Dette er linja som avgjør hvilke vars og secrets jobben får se.
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Vis variabelen
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+          echo "APP_GREETING er: ${{ vars.APP_GREETING }}"
+
+      - name: Vis at secreten maskeres
+        env:
+          TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: |
+          echo "Vi prøver å skrive ut secreten: $TOKEN"
+          echo "Den ble maskert til *** av GitHub, uansett hva vi gjør."
+          echo "Lengden er derimot ikke hemmelig: ${#TOKEN} tegn."
