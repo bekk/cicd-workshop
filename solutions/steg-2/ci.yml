@@ -1,0 +1,56 @@
+# Fasit for steg 2 — bygg og test appen
+#
+# Kopier denne til .github/workflows/ci.yml i forken din.
+#
+# VERSJONERING AV ACTIONS
+# Alle tre skrivemåtene under er gyldige, men de gir ulik grad av kontroll:
+#
+#   actions/checkout@v7
+#       Flytende major-tag. Du får sikkerhetsfikser og nye minorversjoner
+#       automatisk, men GitHub kan flytte taggen under føttene dine.
+#       Dette er standardvalget, og helt greit for de fleste.
+#
+#   actions/checkout@v7.0.1
+#       Låst til én utgivelse. Forutsigbart, men en tag er fortsatt
+#       bare en peker — den *kan* flyttes av den som eier repoet.
+#
+#   actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+#       Låst til én commit. Kan ikke flyttes av noen. Dette er det du vil ha
+#       for actions fra tredjeparter, der en kompromittert tag betyr at
+#       noen andres kode kjører med dine secrets. Skriv alltid versjonen
+#       i en kommentar ved siden av — ellers er det umulig å lese.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Uten checkout er mappa på runneren tom. Dette er den vanligste
+      # grunnen til at en workflow feiler med "file not found".
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      # `cache: npm` lar setup-node cache ~/.npm basert på package-lock.json.
+      # Det sparer typisk 10-20 sekunder per kjøring.
+      - name: Sett opp Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      # `npm ci` i stedet for `npm install`: den installerer nøyaktig det
+      # lockfila sier, og feiler hvis lockfila og package.json er uenige.
+      # Det er den oppførselen du vil ha i CI.
+      - name: Installer avhengigheter
+        run: npm ci
+
+      - name: Kjør tester
+        run: npm test
+
+      - name: Bygg
+        run: npm run build

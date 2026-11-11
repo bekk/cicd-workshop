@@ -1,0 +1,75 @@
+# Fasit for steg 3 — permissions
+#
+# Kopier denne til .github/workflows/ci.yml i forken din (erstatt steg 2).
+#
+# HVA ER GITHUB_TOKEN?
+# Hver kjøring får automatisk en midlertidig token i secrets.GITHUB_TOKEN.
+# Den lever bare så lenge jobben kjører, og rettighetene styres av `permissions:`.
+#
+# HVA SKJER UTEN `pull-requests: write`?
+# `gh pr comment` feiler med:
+#
+#     HTTP 403: Resource not accessible by integration
+#
+# Det er den feilen oppgaven ber deg fremprovosere først. Poenget er at du
+# skal kjenne den igjen senere — den betyr nesten alltid manglende permissions,
+# ikke at noe er galt med koden din.
+#
+# PRINSIPPET
+# Sett `contents: read` på workflow-nivå som utgangspunkt. Da har ingen jobb
+# mer enn den trenger. Utvid så på jobbnivå der det faktisk trengs.
+# Merk: `permissions:` på jobbnivå ERSTATTER workflow-nivået, den legger ikke til.
+# Derfor må `contents: read` gjentas i comment-jobben.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# Utgangspunkt for alle jobber: kun lesetilgang til koden.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      - name: Sett opp Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Installer avhengigheter
+        run: npm ci
+
+      - name: Kjør tester
+        run: npm test
+
+      - name: Bygg
+        run: npm run build
+
+  comment:
+    runs-on: ubuntu-latest
+    needs: build
+    # Det finnes ingen pull request å kommentere på ved en vanlig push.
+    if: github.event_name == 'pull_request'
+    # Denne jobben trenger mer enn utgangspunktet. Jobbnivå erstatter
+    # workflow-nivå, så contents: read må gjentas her.
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # Ingen checkout her! `gh` trenger bare å vite hvilket repo den
+      # skal snakke med, og det forteller vi den med GH_REPO.
+      - name: Kommenter på pull requesten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "${{ github.event.number }}" \
+            --body "Bygget gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"

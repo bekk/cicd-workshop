@@ -1,0 +1,46 @@
+# Fasit for steg 1 — din første workflow
+#
+# Kopier denne til .github/workflows/hello.yml i forken din.
+#
+# Tre ting å legge merke til:
+#   1. `on:` kan ha flere triggere samtidig. workflow_dispatch gir deg en
+#      "Run workflow"-knapp i Actions-fanen, som er gull verdt når du feilsøker.
+#   2. `runs-on` velger runneren. ubuntu-latest er raskest og billigst.
+#      windows-latest og macos-latest finnes også, men macOS koster 10x
+#      så mange minutter som Linux på betalte planer.
+#   3. `shell:` kan settes per steg. Standard på Linux er bash.
+
+name: Hello
+
+on:
+  # Manuell kjøring fra Actions-fanen.
+  workflow_dispatch:
+  # Automatisk kjøring når noe pushes til main.
+  push:
+    branches: [main]
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      # `github`-konteksten er tilgjengelig overalt i workflowen.
+      # github.actor er den som trigget kjøringen.
+      - name: Si hei
+        run: echo "Hei, ${{ github.actor }}!"
+
+      # Flerlinjers run med `|`. Alle linjene kjører i samme shell,
+      # så variabler og mappebytter overlever mellom linjene.
+      - name: Fortell om omgivelsene
+        run: |
+          echo "Repo:    ${{ github.repository }}"
+          echo "Branch:  ${{ github.ref_name }}"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "---"
+          uname -a
+          echo "Vi står i: $(pwd)"
+
+      # PowerShell er installert på ubuntu-runnerne også.
+      # Hvert steg kan velge sitt eget shell: bash, pwsh, python, sh ...
+      - name: Hei fra PowerShell
+        shell: pwsh
+        run: Write-Host "Samme runner, annet shell."
