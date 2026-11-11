@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CI/CD-workshop</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: Canvas;
+        color: CanvasText;
+      }
+      #app { max-width: 34rem; padding: 2rem; text-align: center; }
+      h1 { font-size: clamp(1.8rem, 6vw, 3rem); margin: 0 0 1rem; }
+      .hint { opacity: 0.75; line-height: 1.6; }
+      code { background: color-mix(in srgb, CanvasText 12%, transparent); padding: 0.1em 0.35em; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
