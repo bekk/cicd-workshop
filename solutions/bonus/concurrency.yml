@@ -1,0 +1,33 @@
+# Bonus — concurrency
+#
+# Problemet: du pusher tre ganger på to minutter. Uten concurrency kjører
+# alle tre kjøringene ferdig, og du betaler for to resultater du ikke bryr
+# deg om — samtidig som køen blokkerer for andre.
+#
+# `group` avgjør hva som regnes som "samme ting". Mønsteret under gir én
+# gruppe per workflow per branch, som er det du vil ha for CI.
+#
+# cancel-in-progress:
+#   true  — riktig for CI. Avbryt den gamle kjøringen, bare siste commit teller.
+#   false — riktig for deploy. Ikke avbryt noe som er halvveis ute i verden.
+#           (Se solutions/steg-7/deploy.yml.)
+
+name: Concurrency
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  langsom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lat som vi jobber
+        run: |
+          echo "Starter på commit ${{ github.sha }}"
+          sleep 60
+          echo "Ferdig. Pushet du igjen i mellomtiden, kom du aldri hit."

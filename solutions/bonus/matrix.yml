@@ -1,0 +1,37 @@
+# Bonus — matrix: samme jobb, mange kombinasjoner
+#
+# En matrix lager én jobb per kombinasjon. Denne gir 3 x 2 = 6 jobber,
+# som kjører parallelt.
+#
+# fail-fast: false er nesten alltid det du vil ha under utvikling.
+# Med default (true) avbryter GitHub alle de andre jobbene så snart én
+# feiler — da vet du at Node 22 feilet, men ikke om 24 og 26 også gjorde det.
+#
+# Pass på kostnaden: Windows-minutter teller 2x og macOS 10x mot kvoten
+# på private repoer. På public repoer er det gratis.
+
+name: Matrix
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: [22, 24, 26]
+    # Navnet dukker opp i Actions-fanen. Uten dette heter alle jobbene "test".
+    name: test (node ${{ matrix.node }}, ${{ matrix.os }})
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - run: npm ci
+      - run: npm test

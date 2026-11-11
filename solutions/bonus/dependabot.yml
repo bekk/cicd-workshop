@@ -1,0 +1,30 @@
+# Bonus — hold actions oppdatert automatisk
+#
+# Denne fila hører IKKE hjemme i .github/workflows/.
+# Den skal til .github/dependabot.yml — ett nivå opp.
+#
+# Dependabot lager pull requests når en action du bruker får ny versjon.
+# Det er spesielt verdt det hvis du har pinnet til SHA (se README.md i
+# denne mappa): da oppdaterer Dependabot både SHA-en og versjonskommentaren,
+# så pinningen ikke blir en sovepute.
+
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # Uten dette får du én PR per action. Med gruppering får du én samlet.
+    groups:
+      actions:
+        patterns:
+          - '*'
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        dependency-type: development

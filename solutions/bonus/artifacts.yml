@@ -1,0 +1,58 @@
+# Bonus — artifacts mellom jobber
+#
+# Hver jobb får sin egen, ferske runner. Filer en jobb lager, finnes ikke
+# for den neste. Artifacts er måten å flytte dem på.
+#
+# Ikke forveks artifacts med cache:
+#   cache     — fart. Kan forsvinne når som helst, og det skal ikke gjøre vondt.
+#   artifact  — resultater. Du kan laste dem ned fra kjøringen i nettleseren.
+#
+# `needs:` gjør to ting: den bestemmer rekkefølgen, OG den gir tilgang til
+# den forrige jobbens outputs. Uten `needs` kjører jobbene parallelt, og
+# download-artifact finner ingenting.
+
+name: Artifacts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+
+      - name: Last opp bygget
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          # Default er 90 dager. Korte tider sparer lagringskvote.
+          retention-days: 7
+
+  inspect:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Hent bygget
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Se hva vi fikk
+        run: |
+          ls -la dist/
+          echo "---"
+          echo "Størrelse: $(du -sh dist/ | cut -f1)"

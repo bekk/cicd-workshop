@@ -1,0 +1,51 @@
+# Bonus — caching
+#
+# LES DETTE FØRST: du trenger som regel ikke denne fila.
+# `cache: npm` i actions/setup-node gjør nøyaktig det samme, på én linje.
+# Denne workflowen viser hva som skjer under panseret, slik at du kan gjøre
+# det samme for noe setup-node ikke kan cache — et byggeverktøy, et
+# Playwright-nedlastingsområde, en Gradle-mappe.
+#
+# NØKKELEN ER ALT
+#   key:          eksakt treff gir "cache hit" og hopper over installasjonen
+#   restore-keys: delvis treff gir et gammelt cache som utgangspunkt
+#
+# hashFiles() over lockfila er mønsteret: endrer avhengighetene seg,
+# endres nøkkelen, og du får et nytt cache. Gjør den ikke det, gjenbrukes
+# det gamle.
+#
+# Fallgruve: cache på GitHub er immutable. Du kan ikke overskrive en
+# eksisterende nøkkel. Får du gammelt innhold, må du endre nøkkelen —
+# typisk ved å bumpe "v1" under til "v2".
+
+name: Cache
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Merk: ingen `cache: npm` her — vi gjør det manuelt under.
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: Cache npm-nedlastinger
+        id: npm-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.npm
+          key: v1-${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            v1-${{ runner.os }}-npm-
+
+      - name: Fortell om vi traff
+        run: |
+          echo "Cache hit: ${{ steps.npm-cache.outputs.cache-hit }}"
+
+      - run: npm ci
+      - run: npm test
