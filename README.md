@@ -32,14 +32,18 @@ Trykk **Fork** øverst til høyre.
 
 ### Skru på Actions
 
-> [!IMPORTANT]
-> **Workflows er deaktivert i nye forks.**
-> Gå til **Actions**-fanen i forken din og trykk
-> *«I understand my workflows, go ahead and enable them»*.
->
-> Hopper du over dette, skjer det ingenting når du pusher. Du får ingen
-> feilmelding heller — det er bare stille. Dette er den vanligste grunnen til
-> at folk sitter fast i steg 1.
+Gå innom **Actions**-fanen i forken din én gang.
+
+Dukker det opp en gul boks med *«I understand my workflows, go ahead and enable
+them»*, trykk på den. Som regel gjør den ikke det i denne workshopen: GitHub
+deaktiverer bare workflows en fork *arver*, og dette repoet har med vilje en tom
+`.github/workflows/`. Den første workflowen du skriver selv, kjører derfor med
+én gang du pusher.
+
+> [!NOTE]
+> Skjer det likevel ingenting når du pusher i steg 1, er Actions-fanen det
+> første stedet å se. Det er den eneste innstillingen som kan gjøre repoet helt
+> stille uten å gi en feilmelding.
 
 ### Kjør appen lokalt
 
@@ -168,8 +172,9 @@ Dette steget er laget for å feile. Det er med vilje.
 
 **Forventet resultat**
 
-- Første forsøk: rød jobb med `HTTP 403: Resource not accessible by integration`
-  i loggen.
+- Første forsøk: rød jobb. Nederst i loggen for `comment`-steget står
+  `GraphQL: Resource not accessible by integration (addComment)`. Det er 403-en
+  — `gh` snakker GraphQL her, så den ser ikke ut som en vanlig HTTP-feil.
 - Etter fiksen: grønn jobb, og en kommentar fra *github-actions (bot)* på pull
   requesten din.
 
@@ -344,7 +349,7 @@ Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 
 | Symptom | Som regel |
 |---|---|
-| Ingenting skjer når jeg pusher | Actions ikke skrudd på i forken. Actions-fanen → enable. |
+| Ingenting skjer når jeg pusher | Se Actions-fanen. Er det en gul «enable workflows»-boks der, trykk på den. |
 | Workflowen vises ikke i menyen | Fila må ligge i `.github/workflows/`, hete `.yml`, og være pushet til default-branchen. |
 | `Run workflow`-knappen mangler | Workflowen må finnes på default-branchen for at manuell kjøring skal vises. |
 | `file not found` i et steg | Du har glemt å hente koden inn på runneren først. |

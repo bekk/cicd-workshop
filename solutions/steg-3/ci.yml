@@ -9,7 +9,11 @@
 # HVA SKJER UTEN `pull-requests: write`?
 # `gh pr comment` feiler med:
 #
-#     HTTP 403: Resource not accessible by integration
+#     GraphQL: Resource not accessible by integration (addComment)
+#
+# Merk at det ikke står "HTTP 403" noe sted. `gh pr comment` går via GitHubs
+# GraphQL-API, og der heter 403 dette i stedet. Det er samme sak: tokenet
+# manglet rettigheten.
 #
 # Det er den feilen oppgaven ber deg fremprovosere først. Poenget er at du
 # skal kjenne den igjen senere — den betyr nesten alltid manglende permissions,

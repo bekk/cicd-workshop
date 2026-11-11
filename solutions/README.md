@@ -64,11 +64,12 @@ Begge hører hjemme i steg 0, og begge er verdt å si høyt i plenum:
    finnes ikke på private repoer med gratiskonto. Oppdager noen dette først i
    steg 7, har de gjort seks steg forgjeves på feil premiss.
 
-2. **Actions er deaktivert i nye forks.** Deltakeren må inn på Actions-fanen og
-   trykke «I understand my workflows, go ahead and enable them». Uten dette
-   skjer det *ingenting* når de pusher, og det gir ingen feilmelding — det er
-   bare stille. Erfaringsmessig den vanligste grunnen til at noen rekker opp
-   hånda i steg 1.
+2. **Actions-fanen.** Dette repoet har en tom `.github/workflows/`, så det
+   finnes ingen arvede workflows for GitHub å deaktivere — den første workflowen
+   deltakeren skriver, kjører med én gang. (Verifisert i en ekte fork.) Be dem
+   likevel innom Actions-fanen én gang i steg 0: dukker det opp en gul
+   «enable workflows»-boks, må den trykkes, og det er den eneste innstillingen
+   som kan gjøre repoet helt stille uten å gi en feilmelding.
 
 ### Vanlige spørsmål
 
