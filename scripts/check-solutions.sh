@@ -30,8 +30,12 @@ feil=0
 melding() { printf '%s\n' "$1"; }
 
 # --- 1. Workflows -----------------------------------------------------
-# NB: mapfile finnes ikke i bash 3.2, som er det macOS leverer.
-# Derfor den gammeldagse while-løkka.
+# Fasiten refererer ./.github/workflows/build.yml og ./.github/actions/setup-app,
+# som per design ikke finnes HER — de skal kopieres til deltakerens fork.
+# I stedet for å blinde actionlint for den feilklassen, bygger vi opp den
+# strukturen i en midlertidig mappe og linter der. Da verifiserer vi det som
+# faktisk betyr noe: at fasiten virker når den ligger der den skal.
+
 workflows=()
 while IFS= read -r linje; do workflows+=("$linje"); done < <(
   find solutions -name '*.yml' ! -name 'action.yml' ! -name 'dependabot.yml' | sort
@@ -42,12 +46,30 @@ if [ ${#workflows[@]} -eq 0 ]; then
   exit 1
 fi
 
-# Fasiten refererer ./.github/workflows/build.yml og ./.github/actions/...,
-# som per design ikke finnes i DETTE repoet — de skal kopieres til
-# deltakerens fork. actionlint kan derfor ikke slå dem opp, og den ene
-# feilklassen ignoreres. Alt annet er fortsatt en ekte feil.
-if actionlint -ignore 'could not read reusable workflow file' "${workflows[@]}"; then
-  melding "OK   actionlint: ${#workflows[@]} workflows"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+mkdir -p "$tmp/.github/workflows" "$tmp/.github/actions"
+# actionlint finner "prosjektet" via git-rota. Uten dette sier den
+# "no project was found in any parent directories".
+git -C "$tmp" init -q
+
+# Composite-actionen må ligge på sin kanoniske plass for at
+# `uses: ./.github/actions/setup-app` skal kunne slås opp.
+cp -R solutions/steg-4/actions/setup-app "$tmp/.github/actions/"
+
+# Den gjenbrukbare workflowen må hete build.yml, ellers kan ikke
+# `uses: ./.github/workflows/build.yml` resolves.
+cp solutions/steg-5/build.yml "$tmp/.github/workflows/build.yml"
+
+# Resten kopieres inn med unike navn, siden flere av dem heter ci.yml.
+for f in "${workflows[@]}"; do
+  unikt=$(echo "${f#solutions/}" | tr '/' '-')
+  cp "$f" "$tmp/.github/workflows/$unikt"
+done
+
+# Ingen -ignore. Alt skal være grønt i den sammensatte strukturen.
+if (cd "$tmp" && actionlint); then
+  melding "OK   actionlint: ${#workflows[@]} workflows (lintet som sammensatt fork)"
 else
   melding "FEIL actionlint"
   feil=1

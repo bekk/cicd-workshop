@@ -49,10 +49,15 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       # `id:` er det som gjør at vi kan referere til stegets output senere.
+      #
+      # Merk de TO reporterne. `--reporter=json` alene erstatter standard-
+      # reporteren, og da blir hele loggen én linje: "JSON report written to...".
+      # Feiler en test, står det ingenting om hva som feilet. Vi vil ha begge:
+      # den lesbare utskriften til mennesker, og JSON-fila til jq.
       - name: Kjør tester
         id: test
         run: |
-          npx vitest run --reporter=json --outputFile=vitest-results.json
+          npx vitest run --reporter=default --reporter=json --outputFile=vitest-results.json
           echo "count=$(jq -r '.numTotalTests' vitest-results.json)" >> "$GITHUB_OUTPUT"
 
       - name: Bygg

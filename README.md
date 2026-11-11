@@ -11,7 +11,7 @@ Denne README-en forteller *hva* du skal få til og *hva du skal se* når det
 virker. Den gir deg ikke YAML-en. Den skriver du. Står du fast, ligger det et
 løsningsforslag med forklaringer under [`solutions/`](solutions/).
 
-**Tidsbruk:** omtrent 2 timer for steg 1–7. Bonusstegene tar så lang tid du har.
+**Tidsbruk:** drøye 2 timer for steg 1–7, pluss ti minutter på oppsettet. Bonusstegene tar så lang tid du har.
 
 ---
 
@@ -43,14 +43,19 @@ Trykk **Fork** øverst til høyre.
 
 ### Kjør appen lokalt
 
-Du trenger [Node](https://nodejs.org) 22 eller nyere, og git.
+Du trenger [Node](https://nodejs.org) **22.12 eller nyere** — eller 24, som er
+LTS. Node 23 og 25 er oddetallsversjoner uten langtidsstøtte, og avhengighetene
+her støtter dem ikke. Du trenger også git.
 
 ```bash
-git clone https://github.com/<ditt-brukernavn>/cicd-workshop
-cd cicd-workshop
+git clone https://github.com/<ditt-brukernavn>/<ditt-forknavn>
+cd <ditt-forknavn>
 npm ci
 npm run dev
 ```
+
+Forken trenger ikke hete `cicd-workshop`. Appen er satt opp med relative stier
+nettopp for at den skal virke uansett hva du kaller repoet ditt.
 
 Åpne adressen den skriver ut. Du skal se en hilsen og en setning om
 `VITE_APP_GREETING`. Den variabelen er den røde tråden gjennom workshopen: i
@@ -133,14 +138,33 @@ Dette steget er laget for å feile. Det er med vilje.
 
 **Oppgave**
 
+- Sett `contents: read` som rettighet på workflow-nivå i `ci.yml`, altså for
+  hele fila. Gjør dette **først** — det er det som gjør resten av steget
+  forutsigbart.
 - Utvid `ci.yml` med en jobb som skriver en kommentar på pull requesten når
   bygget er grønt. Bruk `gh pr comment` — `gh` er allerede installert på
   runneren, og `GITHUB_TOKEN` ligger klart i `secrets`.
 - Jobben skal bare kjøre når hendelsen faktisk er en pull request, og den skal
   vente på at byggejobben er ferdig.
-- Lag en branch, endre noe, og åpne en pull request mot `main` i din egen fork.
+- Lag en branch, endre noe, og åpne en pull request mot `main` **i din egen fork**.
 - **Se jobben feile.** Les feilmeldingen før du går videre.
 - Gi så jobben akkurat den rettigheten den mangler — ikke mer — og kjør på nytt.
+
+> [!WARNING]
+> **Sjekk at pull requesten går til ditt eget repo.**
+> Når du pusher en branch til en fork, foreslår GitHub automatisk en PR mot
+> *original-repoet*. Trykker du bare «Create pull request», havner den hos
+> fasilitatoren — og da kjører det ingen sjekker, fordi det repoet har en tom
+> `.github/workflows/`.
+>
+> På PR-skjemaet: sett **base repository** til din egen fork før du oppretter.
+
+> [!NOTE]
+> Hvorfor `contents: read` på workflow-nivå først? Fordi standardrettighetene
+> varierer. Under Settings → Actions → General → Workflow permissions kan et
+> repo stå på «Read and write permissions», og da ville kommentarjobben lyktes
+> på første forsøk — og hele poenget med steget forsvant. Setter du
+> `contents: read` øverst, får du 403 uansett hvordan forken din er satt opp.
 
 **Forventet resultat**
 
@@ -149,9 +173,10 @@ Dette steget er laget for å feile. Det er med vilje.
 - Etter fiksen: grønn jobb, og en kommentar fra *github-actions (bot)* på pull
   requesten din.
 
-**Tenk over** — Sett `contents: read` på workflow-nivå også. Legg merke til at
-rettigheter på jobbnivå *erstatter* workflow-nivået i stedet for å legge til.
-Det overrasker de fleste første gang.
+**Tenk over** — Legg merke til at rettigheter på jobbnivå *erstatter*
+workflow-nivået i stedet for å legge til. Skriver du bare
+`pull-requests: write` på jobben, mister den lesetilgangen til koden som
+workflow-nivået ga. Det overrasker de fleste første gang.
 
 **Les mer** · [GITHUB_TOKEN](https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication) · [Permissions-syntaks](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions#permissions)
 
@@ -209,6 +234,12 @@ Det overrasker de fleste første gang.
 - I Actions-fanen vises den kalte workflowen som en egen, nøstet jobb du kan
   klikke deg inn i.
 - Kommentaren på pull requesten inneholder antall tester.
+
+**Hint** — To ting du ikke har sett før: et steg deler en verdi videre ved å
+skrive `navn=verdi` til fila `$GITHUB_OUTPUT`, og for å få tak i den senere må
+steget ha en `id`. Verdien må så løftes opp i to trinn — fra steg til jobb, og
+fra jobb til workflow. For selve tallet: `vitest` kan skrive en JSON-rapport med
+`--reporter=json --outputFile=...`, og `jq` finnes ferdig installert på runneren.
 
 **Tenk over** — Du har nå laget to typer gjenbruk: en composite action i steg 4
 og en gjenbrukbar workflow her. Hva er egentlig forskjellen, og når velger du
@@ -318,6 +349,8 @@ Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 | `Run workflow`-knappen mangler | Workflowen må finnes på default-branchen for at manuell kjøring skal vises. |
 | `file not found` i et steg | Du har glemt å hente koden inn på runneren først. |
 | `Resource not accessible by integration` | Manglende rettigheter. Se steg 3. |
+| PR-en min kjører ingen sjekker | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 3. |
+| Kommentarjobben ble grønn med én gang | Forken har «Read and write permissions» som standard. Sett `contents: read` på workflow-nivå. Se steg 3. |
 | `Required property is missing: shell` | Du er i en composite action. Se steg 4. |
 | Siden er blank, konsollen sier 404 på assets | Bygget bruker absolutte stier. Se `vite.config.ts`. |
 | Required reviewers finnes ikke i menyen | Forken er privat. Se steg 0. |

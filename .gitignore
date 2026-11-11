@@ -1,4 +1,5 @@
 node_modules/
 dist/
+vitest-results.json
 .DS_Store
 *.local

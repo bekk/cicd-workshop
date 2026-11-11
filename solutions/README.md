@@ -2,9 +2,10 @@
 
 Her ligger løsningsforslag for hvert steg.
 
-Fila ligger **utenfor `.github/`** med vilje. Hadde de ligget i
-`.github/workflows/`, ville GitHub kjørt alle sammen med én gang du forket —
-og du ville aldri fått sett dem feile først.
+Filene ligger **utenfor `.github/`** med vilje. Hadde de ligget i
+`.github/workflows/`, ville de dukket opp som ferdige workflows i forken din
+med én gang du skrudde på Actions — og du ville fått svaret i fanget før du
+hadde begynt.
 
 ## Hvor filene skal
 
@@ -43,6 +44,7 @@ fikk det til på egen hånd.
 | Steg | Tid | Merknad |
 |---|---|---|
 | 0 — Oppsett | 10 min | Gå gjennom i plenum. Det er her folk henger seg opp. |
+| | | *Steg 1–7 summerer til 130 min. Regn med 2,5 time med oppsett og spørsmål.* |
 | 1 — Første workflow | 15 min | |
 | 2 — Bygg og test | 20 min | |
 | 3 — Permissions | 20 min | De må lage en PR. Sett av tid. |

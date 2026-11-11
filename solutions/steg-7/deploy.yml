@@ -48,6 +48,10 @@ jobs:
       - name: Hent koden
         uses: actions/checkout@v7
 
+      # NB: denne forutsetter at du har laget composite-actionen i steg 4.
+      # Hopper du rett hit, feiler kjøringen med "Can't find 'action.yml'".
+      # Bytt i så fall ut dette steget med actions/setup-node + npm ci,
+      # slik det var i steg 2.
       - name: Sett opp appen
         uses: ./.github/actions/setup-app
 
