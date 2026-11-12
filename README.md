@@ -142,8 +142,7 @@ Fasiten svarer på dette.
 
 - To kjøringer av nøyaktig samme fil, med forskjellig utskrift.
 - Variabelen vises i klartekst i loggen.
-- Secreten vises som `***`, uansett hva du prøver. Lengden kan du derimot måle —
-  tenk over hva det betyr.
+- Secreten vises som `***`, uansett hva du prøver. Lengden kan du derimot måle 
 - Kjøringen er merket med hvilket environment den gikk mot.
 
 **Les mer** · [Environments](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) · [Variabler](https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables)
@@ -168,8 +167,7 @@ Fasiten svarer på dette.
    identitetstoken. Finn ut hvilke.
 4. Send verdien fra `APP_GREETING` inn i bygget, slik at hilsenen på den
    deployede siden kommer fra GitHub og ikke fra fallbacken i koden.
-   Variabelen må settes på `github-pages`-environmentet — verdiene fra `dev` og
-   `prod` er ikke synlige her.
+   Variabelen må settes på `github-pages`-environmentet 
 5. Kjør det én gang og sjekk at siden faktisk virker.
 6. **Legg så på gaten:** Settings → Environments → `github-pages` →
    Deployment protection rules → **Required reviewers** → legg til deg selv → Save.
@@ -184,9 +182,7 @@ Fasiten svarer på dette.
 - Du godkjenner din egen deploy, jobben fortsetter, og loggen viser hvem som
   godkjente og når.
 
-**Tenk over** — Hvorfor heter environmentet `github-pages` og ikke `prod`? Og
-hvorfor trenger deployet ingen secrets i det hele tatt? Fasiten forklarer begge
-deler.
+
 
 **Les mer** · [Pages med Actions](https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow) · [Deployment protection rules](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#deployment-protection-rules)
 
