@@ -1,14 +1,11 @@
-# Fasit for steg 5 — ci.yml som bruker composite-actionen
+# Fasit for steg 5 — kommenter på pull requesten
 #
-# Kopier denne til .github/workflows/ci.yml (erstatt steg 4).
+# Kopier denne til .github/workflows/ci.yml i forken din (erstatt steg 2).
 #
-# Sammenlign med steg-4/ci.yml: to steg er blitt til ett `uses:`.
-# Gevinsten er ikke at det er kortere — den er at oppsettet nå finnes
-# ETT sted. Skal du bytte Node-versjon eller legge til et steg, gjør du
-# det i actionen, og alle workflows som bruker den får endringen.
-#
-# `./` foran stien betyr "i dette repoet". GitHub leter etter
-# .github/actions/setup-app/action.yml relativt til repo-rota.
+# GITHUB_TOKEN
+# Hver kjøring får automatisk et midlertidig token i secrets.GITHUB_TOKEN.
+# Det lever bare så lenge jobben kjører, og `permissions:` bestemmer hva det
+# har lov til. Å kommentere på en pull request krever `pull-requests: write`.
 
 name: CI
 
@@ -20,14 +17,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Må fortsatt være først — se kommentaren i action.yml.
       - name: Hent koden
         uses: actions/checkout@v7
 
-      - name: Sett opp appen
-        uses: ./.github/actions/setup-app
+      - name: Sett opp Node
+        uses: actions/setup-node@v7
         with:
-          node-version: '24'
+          node-version: 24
+          cache: npm
+
+      - name: Installer avhengigheter
+        run: npm ci
 
       - name: Kjør tester
         run: npm test
@@ -37,11 +37,16 @@ jobs:
 
   comment:
     runs-on: ubuntu-latest
+    # Venter på at bygget er ferdig, og kjører bare hvis det gikk grønt.
     needs: build
+    # Det finnes ingen pull request å kommentere på ved en vanlig push.
     if: github.event_name == 'pull_request'
+    # Gir tokenet lov til å skrive på pull requests.
     permissions:
       pull-requests: write
     steps:
+      # Ingen checkout her! `gh` trenger bare å vite hvilket repo den
+      # skal snakke med, og det forteller vi den med GH_REPO.
       - name: Kommenter på pull requesten
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -30,7 +30,7 @@ cd cicd-workshop
 
 > [!IMPORTANT]
 > **Gjør forken public.**
-> Steg 3 handler om å kreve godkjenning før et deploy. Den funksjonen —
+> Steg 4 handler om å kreve godkjenning før et deploy. Den funksjonen —
 > *deployment protection rules* — finnes ikke på private repoer med
 > gratiskonto. 
 >
@@ -123,7 +123,36 @@ Fasiten svarer på dette.
 
 ---
 
-## Steg 3 — Deploy med godkjenning
+## Steg 3 — Environments, variabler og secrets
+
+**Mål** — La samme workflow oppføre seg ulikt avhengig av hvor den kjører.
+
+**Oppgave**
+
+- Lag to environments i **Settings → Environments**: `dev` og `prod`.
+- Gi begge en *variabel* som heter `APP_GREETING`, men med forskjellig verdi.
+- Gi begge en *secret* som heter `DEPLOY_TOKEN`, også med ulik verdi. Innholdet
+  spiller ingen rolle.
+- Lag `.github/workflows/environments.yml` som kan startes manuelt, der du velger
+  environment fra en nedtrekksliste.
+- La jobben skrive ut begge verdiene.
+- Kjør den én gang mot `dev` og én gang mot `prod`.
+
+**Forventet resultat**
+
+- To kjøringer av nøyaktig samme fil, med forskjellig utskrift.
+- Variabelen vises i klartekst i loggen.
+- Secreten vises som `***`, uansett hva du prøver. Lengden kan du derimot måle —
+  tenk over hva det betyr.
+- Kjøringen er merket med hvilket environment den gikk mot.
+
+**Les mer** · [Environments](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) · [Variabler](https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables)
+
+**Fasit** · [`solutions/steg-3/`](solutions/steg-3/)
+
+---
+
+## Steg 4 — Deploy med godkjenning
 
 **Mål** — Få appen live på en ekte URL, bak en gate du må klikke på selv.
 
@@ -139,8 +168,8 @@ Fasiten svarer på dette.
    identitetstoken. Finn ut hvilke.
 4. Send verdien fra `APP_GREETING` inn i bygget, slik at hilsenen på den
    deployede siden kommer fra GitHub og ikke fra fallbacken i koden.
-   Variabelen må settes på `github-pages`-environmentet, som GitHub lager når
-   du skrur på Pages.
+   Variabelen må settes på `github-pages`-environmentet — verdiene fra `dev` og
+   `prod` er ikke synlige her.
 5. Kjør det én gang og sjekk at siden faktisk virker.
 6. **Legg så på gaten:** Settings → Environments → `github-pages` →
    Deployment protection rules → **Required reviewers** → legg til deg selv → Save.
@@ -161,11 +190,11 @@ deler.
 
 **Les mer** · [Pages med Actions](https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow) · [Deployment protection rules](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#deployment-protection-rules)
 
-**Fasit** · [`solutions/steg-3/`](solutions/steg-3/)
+**Fasit** · [`solutions/steg-4/`](solutions/steg-4/)
 
 ---
 
-## Steg 4 — Kommenter på pull requesten
+## Steg 5 — Kommenter på pull requesten
 
 **Oppgave**
 
@@ -194,11 +223,11 @@ deler.
 
 **Les mer** · [GITHUB_TOKEN](https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication) · [Permissions-syntaks](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions#permissions) · [gh pr comment](https://cli.github.com/manual/gh_pr_comment)
 
-**Fasit** · [`solutions/steg-4/`](solutions/steg-4/)
+**Fasit** · [`solutions/steg-5/`](solutions/steg-5/)
 
 ---
 
-## Steg 5 — Din egen composite action
+## Steg 6 — Din egen composite action
 
 
 
@@ -219,14 +248,14 @@ deler.
 
 **Les mer** · [Lage en composite action](https://docs.github.com/actions/tutorials/create-actions/create-a-composite-action) · [Metadata-syntaks](https://docs.github.com/actions/reference/metadata-syntax-for-github-actions)
 
-**Fasit** · [`solutions/steg-5/`](solutions/steg-5/)
+**Fasit** · [`solutions/steg-6/`](solutions/steg-6/)
 
 ---
 
-## Steg 6 — Gjenbrukbar workflow
+## Steg 7 — Gjenbrukbar workflow
 
 > [!NOTE]
-> Dette steget kan hoppes over hvis tiden er knapp. Steg 7 bygger ikke på det.
+> Dette steget kan hoppes over hvis tiden er knapp.
 
 **Mål** — Lage en hel workflow som kan kalles fra andre workflows.
 
@@ -236,7 +265,7 @@ deler.
   kalles av andre.
 - Gi den en input for Node-versjon, og la den returnere antall tester som kjørte.
 - La `ci.yml` kalle den i stedet for å ha byggestegene selv.
-- La kommentarjobben fra steg 4 bruke tallet i kommentarteksten.
+- La kommentarjobben fra steg 5 bruke tallet i kommentarteksten.
 
 **Forventet resultat**
 
@@ -250,40 +279,11 @@ steget ha en `id`. Verdien må så løftes opp i to trinn — fra steg til jobb,
 fra jobb til workflow. For selve tallet: `vitest` kan skrive en JSON-rapport med
 `--reporter=json --outputFile=...`, og `jq` finnes ferdig installert på runneren.
 
-**Tenk over** — Du har nå laget to typer gjenbruk: en composite action i steg 5
+**Tenk over** — Du har nå laget to typer gjenbruk: en composite action i steg 6
 og en gjenbrukbar workflow her. Hva er egentlig forskjellen, og når velger du
 hva? Hint: hvor mange runnere er involvert, og hvem bestemmer rettighetene?
 
 **Les mer** · [Gjenbrukbare workflows](https://docs.github.com/actions/how-tos/reuse-automations/reuse-workflows)
-
-**Fasit** · [`solutions/steg-6/`](solutions/steg-6/)
-
----
-
-## Steg 7 — Environments, variabler og secrets
-
-**Mål** — La samme workflow oppføre seg ulikt avhengig av hvor den kjører.
-
-**Oppgave**
-
-- Lag to environments i **Settings → Environments**: `dev` og `prod`.
-- Gi begge en *variabel* som heter `APP_GREETING`, men med forskjellig verdi.
-- Gi begge en *secret* som heter `DEPLOY_TOKEN`, også med ulik verdi. Innholdet
-  spiller ingen rolle.
-- Lag `.github/workflows/environments.yml` som kan startes manuelt, der du velger
-  environment fra en nedtrekksliste.
-- La jobben skrive ut begge verdiene.
-- Kjør den én gang mot `dev` og én gang mot `prod`.
-
-**Forventet resultat**
-
-- To kjøringer av nøyaktig samme fil, med forskjellig utskrift.
-- Variabelen vises i klartekst i loggen.
-- Secreten vises som `***`, uansett hva du prøver. Lengden kan du derimot måle —
-  tenk over hva det betyr.
-- Kjøringen er merket med hvilket environment den gikk mot.
-
-**Les mer** · [Environments](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) · [Variabler](https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables)
 
 **Fasit** · [`solutions/steg-7/`](solutions/steg-7/)
 
@@ -314,8 +314,8 @@ Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 | Workflowen vises ikke i menyen               | Fila må ligge i `.github/workflows/`, hete `.yml`, og være pushet til default-branchen.                  |
 | `Run workflow`-knappen mangler               | Workflowen må finnes på default-branchen for at manuell kjøring skal vises.                              |
 | `file not found` i et steg                   | Du har glemt å hente koden inn på runneren først.                                                        |
-| `Resource not accessible by integration`     | Manglende rettigheter. Se steg 4.                                                                        |
-| PR-en min kjører ingen sjekker               | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 4.                             |
-| `Required property is missing: shell`        | Du er i en composite action. Se steg 5.                                                                  |
+| `Resource not accessible by integration`     | Manglende rettigheter. Se steg 5.                                                                        |
+| PR-en min kjører ingen sjekker               | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 5.                             |
+| `Required property is missing: shell`        | Du er i en composite action. Se steg 6.                                                                  |
 | Siden er blank, konsollen sier 404 på assets | Bygget bruker absolutte stier. Se `vite.config.ts`.                                                      |
 | Required reviewers finnes ikke i menyen      | Forken er privat. Se steg 0.                                                                             |

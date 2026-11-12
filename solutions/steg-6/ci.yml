@@ -1,14 +1,14 @@
-# Fasit for steg 6 — ci.yml som kaller den gjenbrukbare workflowen
+# Fasit for steg 6 — ci.yml som bruker composite-actionen
 #
 # Kopier denne til .github/workflows/ci.yml (erstatt steg 5).
 #
-# Legg merke til at build-jobben ikke har `runs-on` eller `steps` lenger.
-# Den har `uses:`, og peker på en hel workflow. I Actions-fanen vil du se
-# den kalte workflowen som en nøstet jobb du kan klikke deg inn i.
+# Sammenlign med steg-5/ci.yml: to steg er blitt til ett `uses:`.
+# Gevinsten er ikke at det er kortere — den er at oppsettet nå finnes
+# ETT sted. Skal du bytte Node-versjon eller legge til et steg, gjør du
+# det i actionen, og alle workflows som bruker den får endringen.
 #
-# Vil du bruke denne fra et ANNET repo, bytter du `./.github/workflows/build.yml`
-# mot `<brukernavn>/<repo>/.github/workflows/build.yml@v1`. Da må repoet være
-# public, eller tilhøre samme organisasjon med tilgang satt opp.
+# `./` foran stien betyr "i dette repoet". GitHub leter etter
+# .github/actions/setup-app/action.yml relativt til repo-rota.
 
 name: CI
 
@@ -18,9 +18,22 @@ on:
 
 jobs:
   build:
-    uses: ./.github/workflows/build.yml
-    with:
-      node-version: '24'
+    runs-on: ubuntu-latest
+    steps:
+      # Må fortsatt være først — se kommentaren i action.yml.
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      - name: Sett opp appen
+        uses: ./.github/actions/setup-app
+        with:
+          node-version: '24'
+
+      - name: Kjør tester
+        run: npm test
+
+      - name: Bygg
+        run: npm run build
 
   comment:
     runs-on: ubuntu-latest
@@ -35,4 +48,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh pr comment "${{ github.event.number }}" \
-            --body "${{ needs.build.outputs.test-count }} tester gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+            --body "Bygget gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
