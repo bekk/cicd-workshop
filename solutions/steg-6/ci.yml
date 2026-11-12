@@ -1,0 +1,38 @@
+# Fasit for steg 6 — ci.yml som kaller den gjenbrukbare workflowen
+#
+# Kopier denne til .github/workflows/ci.yml (erstatt steg 5).
+#
+# Legg merke til at build-jobben ikke har `runs-on` eller `steps` lenger.
+# Den har `uses:`, og peker på en hel workflow. I Actions-fanen vil du se
+# den kalte workflowen som en nøstet jobb du kan klikke deg inn i.
+#
+# Vil du bruke denne fra et ANNET repo, bytter du `./.github/workflows/build.yml`
+# mot `<brukernavn>/<repo>/.github/workflows/build.yml@v1`. Da må repoet være
+# public, eller tilhøre samme organisasjon med tilgang satt opp.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      node-version: '24'
+
+  comment:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Kommenter på pull requesten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "${{ github.event.number }}" \
+            --body "${{ needs.build.outputs.test-count }} tester gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"

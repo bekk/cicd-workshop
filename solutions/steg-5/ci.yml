@@ -1,8 +1,8 @@
-# Fasit for steg 3 — ci.yml som bruker composite-actionen
+# Fasit for steg 5 — ci.yml som bruker composite-actionen
 #
-# Kopier denne til .github/workflows/ci.yml (erstatt steg 2).
+# Kopier denne til .github/workflows/ci.yml (erstatt steg 4).
 #
-# Sammenlign med steg-2/ci.yml: to steg er blitt til ett `uses:`.
+# Sammenlign med steg-4/ci.yml: to steg er blitt til ett `uses:`.
 # Gevinsten er ikke at det er kortere — den er at oppsettet nå finnes
 # ETT sted. Skal du bytte Node-versjon eller legge til et steg, gjør du
 # det i actionen, og alle workflows som bruker den får endringen.
@@ -34,3 +34,18 @@ jobs:
 
       - name: Bygg
         run: npm run build
+
+  comment:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Kommenter på pull requesten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "${{ github.event.number }}" \
+            --body "Bygget gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"

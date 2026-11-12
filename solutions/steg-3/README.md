@@ -1,4 +1,4 @@
-# Fasit for steg 6 — oppsettet i Settings
+# Fasit for steg 3 — oppsettet i Settings
 
 `deploy.yml` i denne mappa er bare halve svaret. Resten er klikking, og den
 rekkefølgen betyr noe.
@@ -21,10 +21,10 @@ Når du har gjort dette, lager GitHub automatisk et environment som heter
 APP_GREETING = Hei fra GitHub Pages
 ```
 
-Hvorfor her, når du allerede satte den på `dev` og `prod` i steg 5?
-Fordi environment-variabler bare er synlige for jobber som faktisk kjører i
-det environmentet. Deploy-jobben kjører i `github-pages`, og ser derfor
-ingenting av det du la på `dev` eller `prod`.
+Hvorfor på environmentet, og ikke på repoet? Environment-variabler er bare
+synlige for jobber som faktisk kjører i det environmentet. Deploy-jobben kjører
+i `github-pages`, så det er der verdien hører hjemme. I steg 7 ser du hvordan
+samme workflow kan få ulike verdier fra ulike environments.
 
 Hopper du over dette, blir `vars.APP_GREETING` en tom streng, og appen faller
 tilbake til `Hei fra localhost`. Det er ikke en feil — det er fallbacken i

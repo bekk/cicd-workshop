@@ -30,7 +30,7 @@ cd cicd-workshop
 
 > [!IMPORTANT]
 > **Gjør forken public.**
-> Steg 7 handler om å kreve godkjenning før et deploy. Den funksjonen —
+> Steg 3 handler om å kreve godkjenning før et deploy. Den funksjonen —
 > *deployment protection rules* — finnes ikke på private repoer med
 > gratiskonto. 
 >
@@ -123,61 +123,84 @@ Fasiten svarer på dette.
 
 ---
 
-## Steg 3 — Permissions
- 
+## Steg 3 — Deploy med godkjenning
+
+**Mål** — Få appen live på en ekte URL, bak en gate du må klikke på selv.
 
 
 **Oppgave**
 
-- Sett `contents: read` som rettighet på workflow-nivå i `ci.yml`, altså for
-  hele fila. 
-- Utvid `ci.yml` med en jobb som skriver en kommentar på pull requesten når
-  bygget er grønt. Bruk `gh pr comment` — `gh` er allerede installert på
-  runneren, og `GITHUB_TOKEN` ligger klart i `secrets`.
-- Jobben skal bare kjøre når hendelsen faktisk er en pull request, og den skal
-  vente på at byggejobben er ferdig.
-- Lag en branch, endre noe, og åpne en pull request mot `main` **i din egen fork**.
-- **Se jobben feile.** Les feilmeldingen før du går videre.
-- Gi så jobben akkurat den rettigheten den mangler — ikke mer — og kjør på nytt.
-
-> [!WARNING]
-> **Sjekk at pull requesten går til ditt eget repo.**
-> Når du pusher en branch til en fork, foreslår GitHub automatisk en PR mot
-> *original-repoet*. Trykker du bare «Create pull request», havner den hos
-> fasilitatoren — og da kjører det ingen sjekker, fordi det repoet har en tom
-> `.github/workflows/`.
->
-> På PR-skjemaet: sett **base repository** til din egen fork før du oppretter.
-
-> [!NOTE]
-> Hvorfor `contents: read` på workflow-nivå først? Fordi standardrettighetene
-> varierer. Under Settings → Actions → General → Workflow permissions kan et
-> repo stå på «Read and write permissions», og da ville kommentarjobben lyktes
-> på første forsøk — og hele poenget med steget forsvant. Setter du
-> `contents: read` øverst, får du 403 uansett hvordan forken din er satt opp.
+1. Skru på Pages: **Settings → Pages → Source: GitHub Actions**. 
+2. Lag `.github/workflows/deploy.yml` som deployer `dist/` til Pages når du
+   pusher til `main`. Du trenger `actions/upload-pages-artifact` og
+   `actions/deploy-pages`, og jobben må kjøre i environmentet `github-pages`.
+3. Gi jobben rettighetene den trenger. Den trenger `contents: read` for å hente
+   koden, og to til — én for å skrive til Pages, og én for å be om et
+   identitetstoken. Finn ut hvilke.
+4. Send verdien fra `APP_GREETING` inn i bygget, slik at hilsenen på den
+   deployede siden kommer fra GitHub og ikke fra fallbacken i koden.
+   Variabelen må settes på `github-pages`-environmentet, som GitHub lager når
+   du skrur på Pages.
+5. Kjør det én gang og sjekk at siden faktisk virker.
+6. **Legg så på gaten:** Settings → Environments → `github-pages` →
+   Deployment protection rules → **Required reviewers** → legg til deg selv → Save.
+7. Push igjen.
 
 **Forventet resultat**
 
-- Første forsøk: rød jobb. Nederst i loggen for `comment`-steget står
-  `GraphQL: Resource not accessible by integration (addComment)`. Det er 403-en
-  — `gh` snakker GraphQL her, så den ser ikke ut som en vanlig HTTP-feil.
-- Etter fiksen: grønn jobb, og en kommentar fra *github-actions (bot)* på pull
-  requesten din.
+- Første deploy: grønn kjøring, og en klikkbar URL på jobben i Actions-fanen.
+  Siden viser hilsenen du satte i GitHub.
+- Etter at gaten er på: kjøringen stopper med status **Waiting**, og det dukker
+  opp en **Review deployments**-knapp. Ingenting deployes før du trykker.
+- Du godkjenner din egen deploy, jobben fortsetter, og loggen viser hvem som
+  godkjente og når.
 
-**Tenk over** — Legg merke til at rettigheter på jobbnivå *erstatter*
-workflow-nivået i stedet for å legge til. Skriver du bare
-`pull-requests: write` på jobben, mister den lesetilgangen til koden som
-workflow-nivået ga. Det overrasker de fleste første gang.
+**Tenk over** — Hvorfor heter environmentet `github-pages` og ikke `prod`? Og
+hvorfor trenger deployet ingen secrets i det hele tatt? Fasiten forklarer begge
+deler.
 
-**Les mer** · [GITHUB_TOKEN](https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication) · [Permissions-syntaks](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions#permissions)
+**Les mer** · [Pages med Actions](https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow) · [Deployment protection rules](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#deployment-protection-rules)
 
 **Fasit** · [`solutions/steg-3/`](solutions/steg-3/)
 
 ---
 
-## Steg 4 — Din egen composite action
+## Steg 4 — Kommenter på pull requesten
 
-**Mål** — Pakke gjentatte steg inn i en action du kan gjenbruke.
+**Oppgave**
+
+- Utvid `ci.yml` med en jobb som skriver en kommentar på pull requesten når
+  bygget er grønt. Bruk `gh pr comment`. `gh` er allerede installert på
+  runneren.
+- Jobben skal bare kjøre når hendelsen er en pull request, og den skal vente på
+  at byggejobben er ferdig.
+- `gh` trenger et token for å snakke med GitHub. Bruk `GITHUB_TOKEN`, som ligger
+  klart i `secrets`. Tokenet må ha lov til å skrive på pull requests, så gi
+  jobben rettigheten `pull-requests: write` med `permissions:`.
+- Lag en branch, endre noe, og åpne en pull request mot `main` **i din egen fork**.
+
+> [!WARNING]
+> **Sjekk at pull requesten går til ditt eget repo.**
+> GitHub foreslår automatisk en PR mot *original-repoet*. På PR-skjemaet: sett
+> **base repository** til din egen fork før du oppretter.
+
+**Forventet resultat**
+
+- En grønn `comment`-jobb i kjøringen.
+- En kommentar fra *github-actions (bot)* på pull requesten din.
+
+**Hint** — `gh` leser tokenet fra miljøvariabelen `GH_TOKEN` og repoet fra
+`GH_REPO`. Nummeret på pull requesten finner du i `github.event.number`.
+
+**Les mer** · [GITHUB_TOKEN](https://docs.github.com/actions/security-for-github-actions/security-guides/automatic-token-authentication) · [Permissions-syntaks](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions#permissions) · [gh pr comment](https://cli.github.com/manual/gh_pr_comment)
+
+**Fasit** · [`solutions/steg-4/`](solutions/steg-4/)
+
+---
+
+## Steg 5 — Din egen composite action
+
+
 
 **Oppgave**
 
@@ -192,23 +215,18 @@ workflow-nivået ga. Det overrasker de fleste første gang.
 - `ci.yml` er merkbart kortere, og kjøringen gir nøyaktig samme resultat som før.
 - I loggen ser du stegene fra actionen listet opp som vanlige steg.
 
-**To feller du nesten garantert går i**
 
-1. Du får `Required property is missing: shell`. Composite actions har ingen
-   standard for shell — hvert eneste kommandosteg må si det selv.
-2. Du prøver å flytte checkout inn i actionen, og alt faller sammen. Tenk over
-   hvorfor: hvor ligger fila GitHub må lese for å vite hva actionen gjør?
 
 **Les mer** · [Lage en composite action](https://docs.github.com/actions/tutorials/create-actions/create-a-composite-action) · [Metadata-syntaks](https://docs.github.com/actions/reference/metadata-syntax-for-github-actions)
 
-**Fasit** · [`solutions/steg-4/`](solutions/steg-4/)
+**Fasit** · [`solutions/steg-5/`](solutions/steg-5/)
 
 ---
 
-## Steg 5 — Gjenbrukbar workflow
+## Steg 6 — Gjenbrukbar workflow
 
 > [!NOTE]
-> Dette steget kan hoppes over hvis tiden er knapp. Steg 6 og 7 bygger ikke på det.
+> Dette steget kan hoppes over hvis tiden er knapp. Steg 7 bygger ikke på det.
 
 **Mål** — Lage en hel workflow som kan kalles fra andre workflows.
 
@@ -218,7 +236,7 @@ workflow-nivået ga. Det overrasker de fleste første gang.
   kalles av andre.
 - Gi den en input for Node-versjon, og la den returnere antall tester som kjørte.
 - La `ci.yml` kalle den i stedet for å ha byggestegene selv.
-- La kommentarjobben fra steg 3 bruke tallet i kommentarteksten.
+- La kommentarjobben fra steg 4 bruke tallet i kommentarteksten.
 
 **Forventet resultat**
 
@@ -232,17 +250,17 @@ steget ha en `id`. Verdien må så løftes opp i to trinn — fra steg til jobb,
 fra jobb til workflow. For selve tallet: `vitest` kan skrive en JSON-rapport med
 `--reporter=json --outputFile=...`, og `jq` finnes ferdig installert på runneren.
 
-**Tenk over** — Du har nå laget to typer gjenbruk: en composite action i steg 4
+**Tenk over** — Du har nå laget to typer gjenbruk: en composite action i steg 5
 og en gjenbrukbar workflow her. Hva er egentlig forskjellen, og når velger du
 hva? Hint: hvor mange runnere er involvert, og hvem bestemmer rettighetene?
 
 **Les mer** · [Gjenbrukbare workflows](https://docs.github.com/actions/how-tos/reuse-automations/reuse-workflows)
 
-**Fasit** · [`solutions/steg-5/`](solutions/steg-5/)
+**Fasit** · [`solutions/steg-6/`](solutions/steg-6/)
 
 ---
 
-## Steg 6 — Environments, variabler og secrets
+## Steg 7 — Environments, variabler og secrets
 
 **Mål** — La samme workflow oppføre seg ulikt avhengig av hvor den kjører.
 
@@ -266,49 +284,6 @@ hva? Hint: hvor mange runnere er involvert, og hvem bestemmer rettighetene?
 - Kjøringen er merket med hvilket environment den gikk mot.
 
 **Les mer** · [Environments](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments) · [Variabler](https://docs.github.com/actions/how-tos/write-workflows/choose-what-workflows-do/use-variables)
-
-**Fasit** · [`solutions/steg-6/`](solutions/steg-6/)
-
----
-
-## Steg 7 — Deploy med godkjenning
-
-**Mål** — Få appen live på en ekte URL, bak en gate du må klikke på selv.
-
-Dette er høydepunktet. Ta deg tid.
-
-**Oppgave**
-
-1. Skru på Pages: **Settings → Pages → Source: GitHub Actions**. Ikke «Deploy
-   from a branch» — det er den gamle måten, og da ignoreres workflowen din.
-2. Lag `.github/workflows/deploy.yml` som deployer `dist/` til Pages når du
-   pusher til `main`. Du trenger `actions/upload-pages-artifact` og
-   `actions/deploy-pages`, og jobben må kjøre i environmentet `github-pages`.
-3. Gi jobben rettighetene den trenger. Den trenger to utover det vanlige — én
-   for å skrive til Pages, og én for å be om et identitetstoken. Finn ut hvilke.
-4. Send verdien fra `APP_GREETING` inn i bygget, slik at hilsenen på den
-   deployede siden kommer fra GitHub og ikke fra fallbacken i koden.
-   Variabelen må settes på `github-pages`-environmentet — verdiene fra `dev` og
-   `prod` er ikke synlige her.
-5. Kjør det én gang og sjekk at siden faktisk virker.
-6. **Legg så på gaten:** Settings → Environments → `github-pages` →
-   Deployment protection rules → **Required reviewers** → legg til deg selv → Save.
-7. Push igjen.
-
-**Forventet resultat**
-
-- Første deploy: grønn kjøring, og en klikkbar URL på jobben i Actions-fanen.
-  Siden viser hilsenen du satte i GitHub.
-- Etter at gaten er på: kjøringen stopper med status **Waiting**, og det dukker
-  opp en **Review deployments**-knapp. Ingenting deployes før du trykker.
-- Du godkjenner din egen deploy, jobben fortsetter, og loggen viser hvem som
-  godkjente og når.
-
-**Tenk over** — Hvorfor heter environmentet `github-pages` og ikke `prod`? Og
-hvorfor trenger deployet ingen secrets i det hele tatt? Fasiten forklarer begge
-deler.
-
-**Les mer** · [Pages med Actions](https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site#publishing-with-a-custom-github-actions-workflow) · [Deployment protection rules](https://docs.github.com/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#deployment-protection-rules)
 
 **Fasit** · [`solutions/steg-7/`](solutions/steg-7/)
 
@@ -339,9 +314,8 @@ Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 | Workflowen vises ikke i menyen               | Fila må ligge i `.github/workflows/`, hete `.yml`, og være pushet til default-branchen.                  |
 | `Run workflow`-knappen mangler               | Workflowen må finnes på default-branchen for at manuell kjøring skal vises.                              |
 | `file not found` i et steg                   | Du har glemt å hente koden inn på runneren først.                                                        |
-| `Resource not accessible by integration`     | Manglende rettigheter. Se steg 3.                                                                        |
-| PR-en min kjører ingen sjekker               | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 3.                             |
-| Kommentarjobben ble grønn med én gang        | Forken har «Read and write permissions» som standard. Sett `contents: read` på workflow-nivå. Se steg 3. |
-| `Required property is missing: shell`        | Du er i en composite action. Se steg 4.                                                                  |
+| `Resource not accessible by integration`     | Manglende rettigheter. Se steg 4.                                                                        |
+| PR-en min kjører ingen sjekker               | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 4.                             |
+| `Required property is missing: shell`        | Du er i en composite action. Se steg 5.                                                                  |
 | Siden er blank, konsollen sier 404 på assets | Bygget bruker absolutte stier. Se `vite.config.ts`.                                                      |
 | Required reviewers finnes ikke i menyen      | Forken er privat. Se steg 0.                                                                             |

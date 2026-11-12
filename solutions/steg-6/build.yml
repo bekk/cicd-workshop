@@ -1,9 +1,9 @@
-# Fasit for steg 4 — gjenbrukbar workflow
+# Fasit for steg 6 — gjenbrukbar workflow
 #
 # Kopier denne til .github/workflows/build.yml i forken din.
 #
 # COMPOSITE ACTION ELLER GJENBRUKBAR WORKFLOW?
-# Dette er spørsmålet steg 4 egentlig handler om.
+# Dette er spørsmålet steg 6 egentlig handler om.
 #
 #   Composite action = STEG inni en jobb.
 #   Den arver jobbens runner, jobbens permissions og jobbens miljø.
