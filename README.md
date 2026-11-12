@@ -1,65 +1,57 @@
 # CI/CD-workshop
 
-En workshop om GitHub Actions der du skriver alt selv.
-
-Du starter med et repo som har en liten webapp og en **helt tom**
-`.github/workflows/`-mappe. I løpet av sju steg bygger du opp en pipeline som
-tester, bygger og deployer appen til GitHub Pages — med en godkjenning som må
-klikkes før noe går live.
+En workshop om GitHub Actions. Målet med workshopen er å bruke å bygge en pipeline som tester, bygger og deployer appen til GitHub Pages.
 
 Denne README-en forteller *hva* du skal få til og *hva du skal se* når det
-virker. Den gir deg ikke YAML-en. Den skriver du. Står du fast, ligger det et
+virker. Står du fast, ligger det et
 løsningsforslag med forklaringer under [`solutions/`](solutions/).
-
-**Tidsbruk:** drøye 2 timer for steg 1–7, pluss ti minutter på oppsettet. Bonusstegene tar så lang tid du har.
 
 ---
 
 ## Steg 0 — Kom i gang
 
-### Fork repoet
+### Fork og klon repoet
 
-Trykk **Fork** øverst til høyre.
+Du trenger git. Med [GitHub CLI](https://cli.github.com) (`gh`) forker og
+kloner du i én kommando:
+
+```bash
+gh repo fork bekk/cicd-workshop --clone
+cd cicd-workshop
+```
+
+Uten `gh`: åpne [bekk/cicd-workshop](https://github.com/bekk/cicd-workshop),
+trykk **Fork** øverst til høyre, og klon forken:
+
+```bash
+git clone https://github.com/<ditt-brukernavn>/cicd-workshop
+cd cicd-workshop
+```
 
 > [!IMPORTANT]
 > **Gjør forken public.**
 > Steg 7 handler om å kreve godkjenning før et deploy. Den funksjonen —
 > *deployment protection rules* — finnes ikke på private repoer med
-> gratiskonto. Er forken privat, kommer du gjennom seks steg og stanger i det
-> syvende.
+> gratiskonto. 
 >
 > Er den allerede privat: Settings → General → Danger Zone → Change visibility.
 
 ### Skru på Actions
 
-Gå innom **Actions**-fanen i forken din én gang.
+Gå innom **Actions**-fanen i forken din (hvis det er skrudd av).
 
 Dukker det opp en gul boks med *«I understand my workflows, go ahead and enable
-them»*, trykk på den. Som regel gjør den ikke det i denne workshopen: GitHub
-deaktiverer bare workflows en fork *arver*, og dette repoet har med vilje en tom
-`.github/workflows/`. Den første workflowen du skriver selv, kjører derfor med
-én gang du pusher.
+them»*, trykk på den. 
 
-> [!NOTE]
-> Skjer det likevel ingenting når du pusher i steg 1, er Actions-fanen det
-> første stedet å se. Det er den eneste innstillingen som kan gjøre repoet helt
-> stille uten å gi en feilmelding.
 
 ### Kjør appen lokalt
 
-Du trenger [Node](https://nodejs.org) **22.12 eller nyere** — eller 24, som er
-LTS. Node 23 og 25 er oddetallsversjoner uten langtidsstøtte, og avhengighetene
-her støtter dem ikke. Du trenger også git.
+Du trenger [Node](https://nodejs.org) **22.12 eller nyere** eller 24.
 
 ```bash
-git clone https://github.com/<ditt-brukernavn>/<ditt-forknavn>
-cd <ditt-forknavn>
 npm ci
 npm run dev
 ```
-
-Forken trenger ikke hete `cicd-workshop`. Appen er satt opp med relative stier
-nettopp for at den skal virke uansett hva du kaller repoet ditt.
 
 Åpne adressen den skriver ut. Du skal se en hilsen og en setning om
 `VITE_APP_GREETING`. Den variabelen er den røde tråden gjennom workshopen: i
@@ -72,7 +64,6 @@ grønne. Det er de tre kommandoene pipelinen din skal kjøre.
 
 ## Steg 1 — Din første workflow
 
-**Mål** — Få en workflow til å kjøre, og bli kjent med hvor du ser resultatet.
 
 **Oppgave**
 
@@ -332,14 +323,14 @@ deler.
 
 Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 
-| | Oppgave |
-|---|---|
+|        | Oppgave                                                                                                                                              |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **B1** | **Bruk din egen action fra et annet repo.** Tagg forken `v1` og referer actionen med full sti i stedet for `./`. Hva skjer med behovet for checkout? |
-| **B2** | **Matrix.** Kjør testene på Node 22, 24 og 26, på både Linux og Windows. Sørg for at én feilende kombinasjon ikke avbryter de andre. |
-| **B3** | **Caching.** Du skrudde på npm-caching i steg 2 med én linje. Gjør det samme manuelt, og se hva den ene linja egentlig gjorde. |
-| **B4** | **Artifacts.** Last opp `dist/` fra byggejobben og ned igjen i en annen jobb. Hvorfor holder det ikke bare å skrive til disk? |
-| **B5** | **Concurrency.** Få en ny push til å avbryte den forrige kjøringen på samme branch. Hvorfor vil du *ikke* ha dette på deploy-workflowen? |
-| **B6** | **Pinn til SHA.** Bytt alle action-referanser til full commit-SHA, og sett opp Dependabot til å holde dem oppdatert. |
+| **B2** | **Matrix.** Kjør testene på Node 22, 24 og 26, på både Linux og Windows. Sørg for at én feilende kombinasjon ikke avbryter de andre.                 |
+| **B3** | **Caching.** Du skrudde på npm-caching i steg 2 med én linje. Gjør det samme manuelt, og se hva den ene linja egentlig gjorde.                       |
+| **B4** | **Artifacts.** Last opp `dist/` fra byggejobben og ned igjen i en annen jobb. Hvorfor holder det ikke bare å skrive til disk?                        |
+| **B5** | **Concurrency.** Få en ny push til å avbryte den forrige kjøringen på samme branch. Hvorfor vil du *ikke* ha dette på deploy-workflowen?             |
+| **B6** | **Pinn til SHA.** Bytt alle action-referanser til full commit-SHA, og sett opp Dependabot til å holde dem oppdatert.                                 |
 
 **Fasit** · [`solutions/bonus/`](solutions/bonus/)
 
@@ -347,15 +338,15 @@ Uavhengige av hverandre. Ta dem i den rekkefølgen du vil.
 
 ## Når noe ikke virker
 
-| Symptom | Som regel |
-|---|---|
-| Ingenting skjer når jeg pusher | Se Actions-fanen. Er det en gul «enable workflows»-boks der, trykk på den. |
-| Workflowen vises ikke i menyen | Fila må ligge i `.github/workflows/`, hete `.yml`, og være pushet til default-branchen. |
-| `Run workflow`-knappen mangler | Workflowen må finnes på default-branchen for at manuell kjøring skal vises. |
-| `file not found` i et steg | Du har glemt å hente koden inn på runneren først. |
-| `Resource not accessible by integration` | Manglende rettigheter. Se steg 3. |
-| PR-en min kjører ingen sjekker | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 3. |
-| Kommentarjobben ble grønn med én gang | Forken har «Read and write permissions» som standard. Sett `contents: read` på workflow-nivå. Se steg 3. |
-| `Required property is missing: shell` | Du er i en composite action. Se steg 4. |
-| Siden er blank, konsollen sier 404 på assets | Bygget bruker absolutte stier. Se `vite.config.ts`. |
-| Required reviewers finnes ikke i menyen | Forken er privat. Se steg 0. |
+| Symptom                                      | Som regel                                                                                                |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Ingenting skjer når jeg pusher               | Se Actions-fanen. Er det en gul «enable workflows»-boks der, trykk på den.                               |
+| Workflowen vises ikke i menyen               | Fila må ligge i `.github/workflows/`, hete `.yml`, og være pushet til default-branchen.                  |
+| `Run workflow`-knappen mangler               | Workflowen må finnes på default-branchen for at manuell kjøring skal vises.                              |
+| `file not found` i et steg                   | Du har glemt å hente koden inn på runneren først.                                                        |
+| `Resource not accessible by integration`     | Manglende rettigheter. Se steg 3.                                                                        |
+| PR-en min kjører ingen sjekker               | PR-en gikk til original-repoet. Sjekk «base repository» på PR-en. Se steg 3.                             |
+| Kommentarjobben ble grønn med én gang        | Forken har «Read and write permissions» som standard. Sett `contents: read` på workflow-nivå. Se steg 3. |
+| `Required property is missing: shell`        | Du er i en composite action. Se steg 4.                                                                  |
+| Siden er blank, konsollen sier 404 på assets | Bygget bruker absolutte stier. Se `vite.config.ts`.                                                      |
+| Required reviewers finnes ikke i menyen      | Forken er privat. Se steg 0.                                                                             |
