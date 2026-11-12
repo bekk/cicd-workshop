@@ -1,4 +1,4 @@
-# Fasit for steg 7 — deploy til GitHub Pages med godkjenning
+# Fasit for steg 6 — deploy til GitHub Pages med godkjenning
 #
 # Kopier denne til .github/workflows/deploy.yml i forken din.
 # Se README.md i samme mappe for klikkingen som må gjøres i Settings.
@@ -13,7 +13,7 @@
 # HVORFOR HETER ENVIRONMENTET github-pages?
 # Det er påkrevd. Pages deployer kun fra et environment med akkurat det
 # navnet, så du kan ikke kalle det "prod" selv om det er dit du deployer.
-# Det er derfor dette steget ikke gjenbruker environmentene fra steg 6.
+# Det er derfor dette steget ikke gjenbruker environmentene fra steg 5.
 # Det er en reell særegenhet ved Pages, ikke en forenkling i workshopen.
 #
 # HVORFOR cancel-in-progress: false?
@@ -48,14 +48,14 @@ jobs:
       - name: Hent koden
         uses: actions/checkout@v7
 
-      # NB: denne forutsetter at du har laget composite-actionen i steg 4.
+      # NB: denne forutsetter at du har laget composite-actionen i steg 3.
       # Hopper du rett hit, feiler kjøringen med "Can't find 'action.yml'".
       # Bytt i så fall ut dette steget med actions/setup-node + npm ci,
       # slik det var i steg 2.
       - name: Sett opp appen
         uses: ./.github/actions/setup-app
 
-      # Her kobles steg 6 og steg 7 sammen: variabelen fra environmentet
+      # Her kobles steg 5 og steg 6 sammen: variabelen fra environmentet
       # settes som miljøvariabel under bygget, og Vite baker den inn i
       # den ferdige JavaScript-fila. Den er altså låst på byggetidspunktet,
       # ikke noe som kan endres etterpå uten å bygge på nytt.

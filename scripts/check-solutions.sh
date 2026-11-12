@@ -55,11 +55,11 @@ git -C "$tmp" init -q
 
 # Composite-actionen må ligge på sin kanoniske plass for at
 # `uses: ./.github/actions/setup-app` skal kunne slås opp.
-cp -R solutions/steg-4/actions/setup-app "$tmp/.github/actions/"
+cp -R solutions/steg-3/actions/setup-app "$tmp/.github/actions/"
 
 # Den gjenbrukbare workflowen må hete build.yml, ellers kan ikke
 # `uses: ./.github/workflows/build.yml` resolves.
-cp solutions/steg-5/build.yml "$tmp/.github/workflows/build.yml"
+cp solutions/steg-4/build.yml "$tmp/.github/workflows/build.yml"
 
 # Resten kopieres inn med unike navn, siden flere av dem heter ci.yml.
 for f in "${workflows[@]}"; do

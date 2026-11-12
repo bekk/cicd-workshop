@@ -54,8 +54,7 @@ npm run dev
 ```
 
 Åpne adressen den skriver ut. Du skal se en hilsen og en setning om
-`VITE_APP_GREETING`. Den variabelen er den røde tråden gjennom workshopen: i
-steg 6 setter du den i GitHub, og i steg 7 havner den på den deployede siden.
+`VITE_APP_GREETING`. 
 
 Prøv også `npm test` og `npm run build`, så du vet hvordan de ser ut når de er
 grønne. Det er de tre kommandoene pipelinen din skal kjøre.
@@ -85,7 +84,7 @@ grønne. Det er de tre kommandoene pipelinen din skal kjøre.
 
 **Hint** — Navnet som vises i menyen kommer fra `name` i fila, ikke fra filnavnet.
 Trigges den ikke manuelt? Den knappen vises bare når workflowen finnes på
-default-branchen.
+default-branchen. (altså at den har blitt merget til main)
 
 **Les mer** · [Workflow-syntaks](https://docs.github.com/actions/reference/workflow-syntax-for-github-actions) · [Triggere](https://docs.github.com/actions/reference/events-that-trigger-workflows)
 
@@ -95,13 +94,12 @@ default-branchen.
 
 ## Steg 2 — Bygg og test appen
 
-**Mål** — Kjøre testene og bygget automatisk, med actions fra marketplace.
+
 
 **Oppgave**
 
 - Lag `.github/workflows/ci.yml` som trigges på push og på pull request.
-- Hent koden inn på runneren. *Uten dette er mappa tom* — det er den vanligste
-  nybegynnerfeilen.
+- Hent koden inn på runneren. 
 - Sett opp Node 24, og skru på caching av npm-avhengigheter.
 - Kjør `npm ci`, `npm test` og `npm run build` som egne steg.
 - Når det er grønt: ødelegg en test i `src/greeting.test.ts` med vilje, push, og
@@ -126,16 +124,13 @@ Fasiten svarer på dette.
 ---
 
 ## Steg 3 — Permissions
+ 
 
-**Mål** — Forstå hva `GITHUB_TOKEN` har lov til, ved å ta rettighetene fra den først.
-
-Dette steget er laget for å feile. Det er med vilje.
 
 **Oppgave**
 
 - Sett `contents: read` som rettighet på workflow-nivå i `ci.yml`, altså for
-  hele fila. Gjør dette **først** — det er det som gjør resten av steget
-  forutsigbart.
+  hele fila. 
 - Utvid `ci.yml` med en jobb som skriver en kommentar på pull requesten når
   bygget er grønt. Bruk `gh pr comment` — `gh` er allerede installert på
   runneren, og `GITHUB_TOKEN` ligger klart i `secrets`.

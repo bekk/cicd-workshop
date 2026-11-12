@@ -10,7 +10,7 @@ if (app) {
     <p class="hint">
       Teksten over styres av miljøvariabelen <code>VITE_APP_GREETING</code>
       på byggetidspunktet. Lokalt er den ikke satt, så du ser fallback-verdien.
-      I steg 6 og 7 setter du den som en environment-variabel i GitHub.
+      I steg 5 og 6 setter du den som en environment-variabel i GitHub.
     </p>
   `
 }
