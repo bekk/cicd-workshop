@@ -1,4 +1,4 @@
-# Fasit for steg 2 — bygg og test appen
+# Fasit for steg 2 — test appen
 #
 # Kopier denne til .github/workflows/ci.yml i forken din.
 #
@@ -51,6 +51,3 @@ jobs:
 
       - name: Kjør tester
         run: npm test
-
-      - name: Bygg
-        run: npm run build

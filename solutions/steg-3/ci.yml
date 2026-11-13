@@ -1,0 +1,88 @@
+# Fasit for steg 3 — deploy til GitHub Pages
+#
+# Kopier denne til .github/workflows/ci.yml i forken din (erstatt steg 2).
+# Se README.md i samme mappe for klikkingen som må gjøres i Settings.
+#
+# BYGG FØRST, SÅ DEPLOY
+# Pages deployer filer, ikke kildekode. Byggejobben kjører `npm run build`,
+# som lager dist/, og laster den opp som et artifact. Deploy-jobben henter
+# det artifactet og publiserer det. Uten bygget finnes det ingenting å deploye.
+#
+# MINST MULIG RETTIGHETER
+# Hver kjøring får automatisk et token, GITHUB_TOKEN. `permissions:` bestemmer
+# hva det har lov til. Gi rettighetene på jobben som trenger dem, ikke for hele
+# workflowen — da har ingen andre jobber mer enn de trenger.
+#
+# HVORFOR id-token: write?
+# deploy-pages bruker OIDC: den ber GitHub om et kortlevd, signert token
+# som beviser hvilken workflow i hvilket repo som kjører, og bytter det inn
+# mot tilgang til Pages-APIet. Du trenger altså ingen secrets her —
+# det er hele gevinsten med OIDC.
+#
+# HVORFOR HETER ENVIRONMENTET github-pages?
+# Det er påkrevd. Pages deployer kun fra et environment med akkurat det
+# navnet, så du kan ikke kalle det "prod" selv om det er dit du deployer.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      - name: Sett opp Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Installer avhengigheter
+        run: npm ci
+
+      - name: Kjør tester
+        run: npm test
+
+      # Repo-variabelen settes som miljøvariabel under bygget, og Vite baker
+      # den inn i den ferdige JavaScript-fila. Den er altså låst på
+      # byggetidspunktet, og kan ikke endres etterpå uten å bygge på nytt.
+      - name: Bygg
+        env:
+          VITE_APP_GREETING: ${{ vars.APP_GREETING }}
+        run: npm run build
+
+      # Pakker dist/ som et artifact i det formatet deploy-pages forventer.
+      - name: Last opp Pages-artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    # Venter på bygget, og kjører bare hvis det gikk grønt.
+    needs: build
+    # github-pages-environmentet tillater bare deploy fra main. På andre
+    # brancher og pull requests hopper vi derfor over jobben.
+    if: github.ref == 'refs/heads/main'
+    # Bare det denne jobben trenger. Ingen checkout, så ingen contents: read.
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      # URL-en dukker opp som en klikkbar lenke på kjøringen i Actions-fanen.
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Avbryt aldri et deploy som er halvveis. Kommer det et nytt, venter det.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      # `id:` trengs for at environment.url over skal få tak i page_url.
+      - name: Deploy til Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

@@ -1,9 +1,9 @@
-# Fasit for steg 7 — gjenbrukbar workflow
+# Fasit for steg 6 — gjenbrukbar workflow
 #
 # Kopier denne til .github/workflows/build.yml i forken din.
 #
 # COMPOSITE ACTION ELLER GJENBRUKBAR WORKFLOW?
-# Dette er spørsmålet steg 7 egentlig handler om.
+# Dette er spørsmålet steg 6 egentlig handler om.
 #
 #   Composite action = STEG inni en jobb.
 #   Den arver jobbens runner, jobbens permissions og jobbens miljø.
@@ -60,5 +60,13 @@ jobs:
           npx vitest run --reporter=default --reporter=json --outputFile=vitest-results.json
           echo "count=$(jq -r '.numTotalTests' vitest-results.json)" >> "$GITHUB_OUTPUT"
 
+      # Repo-variabler (`vars`) er tilgjengelige i en kalt workflow i samme repo.
       - name: Bygg
+        env:
+          VITE_APP_GREETING: ${{ vars.APP_GREETING }}
         run: npm run build
+
+      - name: Last opp Pages-artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist

@@ -1,0 +1,82 @@
+# Fasit for steg 4 — kommenter på pull requesten
+#
+# Kopier denne til .github/workflows/ci.yml i forken din (erstatt steg 3).
+#
+# GITHUB_TOKEN
+# Hver kjøring får automatisk et midlertidig token i secrets.GITHUB_TOKEN.
+# Det lever bare så lenge jobben kjører, og `permissions:` bestemmer hva det
+# har lov til. Å kommentere på en pull request krever `pull-requests: write`.
+# Som i steg 3 gir vi rettigheten bare til jobben som trenger den.
+
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hent koden
+        uses: actions/checkout@v7
+
+      - name: Sett opp Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Installer avhengigheter
+        run: npm ci
+
+      - name: Kjør tester
+        run: npm test
+
+      - name: Bygg
+        env:
+          VITE_APP_GREETING: ${{ vars.APP_GREETING }}
+        run: npm run build
+
+      - name: Last opp Pages-artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy til Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  comment:
+    runs-on: ubuntu-latest
+    # Venter på at bygget er ferdig, og kjører bare hvis det gikk grønt.
+    needs: build
+    # Det finnes ingen pull request å kommentere på ved en vanlig push.
+    if: github.event_name == 'pull_request'
+    # Gir tokenet lov til å skrive på pull requests.
+    permissions:
+      pull-requests: write
+    steps:
+      # Ingen checkout her! `gh` trenger bare å vite hvilket repo den
+      # skal snakke med, og det forteller vi den med GH_REPO.
+      - name: Kommenter på pull requesten
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh pr comment "${{ github.event.number }}" \
+            --body "Bygget gikk grønt ✅ — kjøring [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"

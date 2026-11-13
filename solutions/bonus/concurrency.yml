@@ -10,7 +10,7 @@
 # cancel-in-progress:
 #   true  — riktig for CI. Avbryt den gamle kjøringen, bare siste commit teller.
 #   false — riktig for deploy. Ikke avbryt noe som er halvveis ute i verden.
-#           (Se solutions/steg-4/deploy.yml.)
+#           (Se deploy-jobben i solutions/steg-3/ci.yml.)
 
 name: Concurrency
 
