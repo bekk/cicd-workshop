@@ -38,4 +38,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       #- run: gh pr comment ${{github.}}
-      - run: echo "${{github.event.issue.number}}"
+      - run: echo "${{github.event.number}}"
