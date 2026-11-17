@@ -34,3 +34,7 @@ jobs:
     environment: github-pages
     steps:
       - uses: actions/deploy-pages@v4
+  comment:
+    steps:
+      #- run: gh pr comment ${{github.}}
+      - run: echo "${{github.event}}
