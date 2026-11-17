@@ -10,3 +10,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: echo "Skrevet av ${{github.actor}}"
+      - run: node --version
