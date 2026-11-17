@@ -26,6 +26,9 @@ jobs:
           path:
             dist/
   deploy:
+    permissions:
+      pages: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment: github-pages
