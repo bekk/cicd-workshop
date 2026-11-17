@@ -35,6 +35,7 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
   comment:
+    runs-on: ubuntu-latest
     steps:
       #- run: gh pr comment ${{github.}}
       - run: echo "${{github.event}}
